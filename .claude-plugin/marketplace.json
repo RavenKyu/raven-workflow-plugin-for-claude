@@ -1,0 +1,27 @@
+{
+  "name": "raven-workflow",
+  "owner": {
+    "name": "Raven",
+    "email": "hong18s@gmail.com"
+  },
+  "metadata": {
+    "description": "Enforced Spec → GitHub Issue → Git Worktree → Beads workflow with Ralph loop and Serena MCP support",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "workflow",
+      "source": "./plugins/workflow",
+      "description": "Enforced Spec → GitHub Issue → Git Worktree → Beads workflow with Ralph loop and Serena MCP",
+      "version": "1.0.0",
+      "author": {
+        "name": "Raven",
+        "email": "hong18s@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": ["workflow", "beads", "worktree", "ralph-loop", "serena", "mcp"],
+      "category": "productivity",
+      "tags": ["workflow", "beads", "worktree", "ralph-loop", "autonomous", "spec-driven"]
+    }
+  ]
+}

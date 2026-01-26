@@ -6,6 +6,38 @@ Claude Code 환경에서 **Spec → GitHub Issue → Git Worktree → Beads** �
 
 ---
 
+## Plugin Marketplace
+
+이 저장소는 Claude Code Plugin Marketplace로도 배포됩니다.
+
+### 설치
+
+```bash
+# 마켓플레이스 추가
+/plugin marketplace add <owner>/my-cluade-settings
+
+# 플러그인 설치
+/plugin install workflow@raven-workflow
+```
+
+### 플러그인으로 사용 시 명령어
+
+모든 명령어에 `workflow:` 접두사가 붙습니다:
+
+| 명령어 | 설명 |
+|--------|------|
+| `/workflow:install` | 프로젝트 초기 설정 (디렉토리, Beads, Serena MCP) |
+| `/workflow:spec <name>` | 기능 스펙 작성 |
+| `/workflow:create-issues <spec>` | GitHub Epic + Task 이슈 생성 |
+| `/workflow:worktree <issue-#>` | 이슈 기반 Worktree 생성 |
+| `/workflow:task [id]` | Beads 태스크 작업 (대화형) |
+| `/workflow:ralph [--max-iterations N]` | 자율 태스크 루프 (Ralph Loop) |
+| `/workflow:pr` | Pull Request 생성 |
+
+자세한 플러그인 문서는 [`plugins/workflow/README.md`](plugins/workflow/README.md)를 참조하세요.
+
+---
+
 ## 목차
 
 - [워크플로우 개요](#워크플로우-개요)
@@ -82,6 +114,20 @@ Beads가 설치되어 있지 않으면 setup 스크립트로 자동 설치할 �
 ├── README.md                          # 이 문서
 ├── specs/                             # 기능 스펙 문서 저장소
 │   └── <feature-name>.md
+│
+├── .claude-plugin/
+│   └── marketplace.json               # 플러그인 마켓플레이스 카탈로그
+│
+├── plugins/
+│   └── workflow/                      # Claude Code Plugin 패키지
+│       ├── .claude-plugin/plugin.json
+│       ├── commands/                  # /workflow:* 명령어
+│       ├── skills/workflow/SKILL.md
+│       ├── agents/task-worker.md
+│       ├── hooks/hooks.json
+│       ├── scripts/
+│       ├── templates/
+│       └── README.md
 │
 └── .claude/
     ├── settings.json                  # Hook 설정
