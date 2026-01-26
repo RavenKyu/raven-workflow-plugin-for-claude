@@ -14,7 +14,7 @@ Claude Code 환경에서 **Spec → GitHub Issue → Git Worktree → Beads** �
 
 ```bash
 # 마켓플레이스 추가
-/plugin marketplace add <owner>/my-cluade-settings
+/plugin marketplace add RavenKyu/raven-workflow-plugin-for-claude
 
 # 플러그인 설치
 /plugin install workflow@raven-workflow
