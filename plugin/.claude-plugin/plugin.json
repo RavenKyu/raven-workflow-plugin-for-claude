@@ -1,0 +1,9 @@
+{
+  "name": "workflow",
+  "description": "Enforced Spec → GitHub Issue → Git Worktree → Beads workflow with Ralph loop support",
+  "version": "1.0.0",
+  "author": {
+    "name": "limdukkyu"
+  },
+  "license": "MIT"
+}
