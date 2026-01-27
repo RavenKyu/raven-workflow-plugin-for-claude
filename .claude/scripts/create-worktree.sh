@@ -16,6 +16,12 @@ fi
 ISSUE_NUMBER="$1"
 DESCRIPTION="${2:-}"
 
+# Validate issue number is a positive integer
+if ! [[ "$ISSUE_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
+  echo "ERROR: Issue number must be a positive integer, got: ${ISSUE_NUMBER}" >&2
+  exit 1
+fi
+
 # Verify issue exists
 if ! gh issue view "$ISSUE_NUMBER" --json title -q '.title' > /dev/null 2>&1; then
   echo "ERROR: GitHub issue #${ISSUE_NUMBER} not found." >&2
@@ -72,13 +78,15 @@ echo "  Issue:  #${ISSUE_NUMBER}"
 
 # Initialize beads if available
 if command -v bd > /dev/null 2>&1; then
-  cd "$WORKTREE_DIR"
-  if [[ ! -d ".beads" ]]; then
-    bd init
-    echo "  Beads:  initialized"
-  else
-    echo "  Beads:  already initialized"
-  fi
+  (
+    cd "$WORKTREE_DIR"
+    if [[ ! -d ".beads" ]]; then
+      bd init
+      echo "  Beads:  initialized"
+    else
+      echo "  Beads:  already initialized"
+    fi
+  )
 else
   echo "  Beads:  not installed (run setup-beads.sh to install)"
 fi
