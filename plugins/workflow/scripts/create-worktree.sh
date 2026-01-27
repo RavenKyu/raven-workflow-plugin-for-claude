@@ -66,10 +66,10 @@ BRANCH_NAME="feat/${ISSUE_NUMBER}-${DESCRIPTION}"
 # Ensure worktrees parent directory exists
 mkdir -p ../worktrees
 
-# Check if worktree already exists
-if git worktree list | grep -q "${ISSUE_NUMBER}-${DESCRIPTION}"; then
+# Check if worktree already exists (anchor to path separator to avoid partial matches)
+if git worktree list | grep -q "/${ISSUE_NUMBER}-${DESCRIPTION} "; then
   echo "Worktree already exists for issue #${ISSUE_NUMBER}."
-  echo "Path: $(git worktree list | grep "${ISSUE_NUMBER}-${DESCRIPTION}" | awk '{print $1}')"
+  echo "Path: $(git worktree list | grep "/${ISSUE_NUMBER}-${DESCRIPTION} " | awk '{print $1}')"
   exit 0
 fi
 

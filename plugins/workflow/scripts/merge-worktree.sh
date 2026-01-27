@@ -18,6 +18,12 @@ if [[ ! -d "$WORKTREE_PATH" ]]; then
 fi
 WORKTREE_PATH=$(cd "$WORKTREE_PATH" && pwd)
 
+# Validate path is within a worktrees directory
+if [[ "$WORKTREE_PATH" != */worktrees/* ]]; then
+  echo "ERROR: Path must be within a worktrees/ directory: ${WORKTREE_PATH}" >&2
+  exit 1
+fi
+
 # Verify this is a worktree
 if ! git -C "$WORKTREE_PATH" rev-parse --is-inside-work-tree > /dev/null 2>&1; then
   echo "ERROR: ${WORKTREE_PATH} is not a git worktree." >&2

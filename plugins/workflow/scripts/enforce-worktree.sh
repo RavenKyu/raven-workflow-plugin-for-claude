@@ -5,6 +5,11 @@
 # Input: JSON on stdin with tool_input.command
 # Exit 0: allow, Exit 2: block
 
+if ! command -v jq > /dev/null 2>&1; then
+  echo "ERROR: jq is required for enforce-worktree hook but not installed." >&2
+  exit 2
+fi
+
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
