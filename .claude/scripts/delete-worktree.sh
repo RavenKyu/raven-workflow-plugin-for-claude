@@ -2,11 +2,32 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: $0 <worktree-path>"
+  echo "Usage: $0 [--yes] <worktree-path>"
   echo ""
   echo "Deletes a worktree and its branch WITHOUT merging."
+  echo ""
+  echo "Options:"
+  echo "  --yes, -y    Skip confirmation prompt"
   exit 1
 }
+
+SKIP_CONFIRM=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --yes|-y)
+      SKIP_CONFIRM=true
+      shift
+      ;;
+    -*)
+      echo "ERROR: Unknown option: $1" >&2
+      usage
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
 
 if [[ $# -lt 1 ]]; then
   usage
@@ -39,12 +60,14 @@ echo "  Path:   ${WORKTREE_PATH}"
 echo "  Branch: ${BRANCH_NAME}"
 echo ""
 
-read -p "Are you sure? (y/N) " -n 1 -r
-echo ""
+if [[ "$SKIP_CONFIRM" != true ]]; then
+  read -p "Are you sure? (y/N) " -n 1 -r
+  echo ""
 
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-  echo "Cancelled."
-  exit 0
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Cancelled."
+    exit 0
+  fi
 fi
 
 cd "$MAIN_REPO"

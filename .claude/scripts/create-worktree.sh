@@ -27,6 +27,10 @@ fi
 if [[ -z "$DESCRIPTION" ]]; then
   ISSUE_TITLE=$(gh issue view "$ISSUE_NUMBER" --json title -q '.title')
   DESCRIPTION=$(echo "$ISSUE_TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+  # Fallback if title has no ASCII characters (e.g. Korean/CJK titles)
+  if [[ -z "$DESCRIPTION" ]]; then
+    DESCRIPTION="task"
+  fi
 fi
 
 WORKTREE_DIR="../worktrees/${ISSUE_NUMBER}-${DESCRIPTION}"
