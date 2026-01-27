@@ -15,7 +15,7 @@ fi
 
 # Detect new branch creation commands
 if echo "$COMMAND" | grep -qE 'git\s+checkout\s+-b|git\s+switch\s+-c'; then
-  echo "BLOCKED: 직접 브랜치 생성이 차단되었습니다." >&2
+  echo "BLOCKED: Direct branch creation is not allowed." >&2
   echo "Use /worktree <issue-number> to create a worktree-based branch." >&2
   exit 2
 fi
@@ -26,7 +26,7 @@ if echo "$COMMAND" | grep -qE 'git\s+branch\s+[^-]'; then
   if echo "$COMMAND" | grep -qE 'git\s+branch\s+(-d|-D|--delete|--list|-v|-vv|-a|-r|--show-current|--merged|--no-merged|--contains|--sort)'; then
     exit 0
   fi
-  echo "BLOCKED: 직접 브랜치 생성이 차단되었습니다." >&2
+  echo "BLOCKED: Direct branch creation is not allowed." >&2
   echo "Use /worktree <issue-number> to create a worktree-based branch." >&2
   exit 2
 fi

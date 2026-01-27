@@ -12,6 +12,10 @@ usage() {
 WORKTREE_PATH="${1:-$(pwd)}"
 
 # Resolve to absolute path
+if [[ ! -d "$WORKTREE_PATH" ]]; then
+  echo "ERROR: Directory not found: ${WORKTREE_PATH}" >&2
+  exit 1
+fi
 WORKTREE_PATH=$(cd "$WORKTREE_PATH" && pwd)
 
 # Verify this is a worktree
@@ -45,8 +49,23 @@ fi
 
 # Switch to main repo and merge
 cd "$MAIN_REPO"
+
+# Check for uncommitted changes in main repo
+if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+  echo "ERROR: Main repo has uncommitted changes. Commit or stash them first." >&2
+  exit 1
+fi
+
 git checkout "$BASE_BRANCH"
-git merge "$BRANCH_NAME"
+
+if ! git merge "$BRANCH_NAME"; then
+  echo "" >&2
+  echo "ERROR: Merge failed (likely due to conflicts)." >&2
+  echo "Resolve conflicts in ${MAIN_REPO}, then run:" >&2
+  echo "  git worktree remove ${WORKTREE_PATH}" >&2
+  echo "  git branch -d ${BRANCH_NAME}" >&2
+  exit 1
+fi
 
 echo ""
 echo "Merge complete. Cleaning up worktree..."

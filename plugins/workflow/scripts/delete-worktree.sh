@@ -36,6 +36,10 @@ fi
 WORKTREE_PATH="$1"
 
 # Resolve to absolute path
+if [[ ! -d "$WORKTREE_PATH" ]]; then
+  echo "ERROR: Directory not found: ${WORKTREE_PATH}" >&2
+  exit 1
+fi
 WORKTREE_PATH=$(cd "$WORKTREE_PATH" && pwd)
 
 # Verify this is a worktree
