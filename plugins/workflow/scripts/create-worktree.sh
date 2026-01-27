@@ -56,7 +56,14 @@ if ! git rev-parse --verify origin/main > /dev/null 2>&1; then
 fi
 
 # Create worktree
-git worktree add "$WORKTREE_DIR" -b "$BRANCH_NAME" "origin/${BASE_BRANCH}"
+if ! git worktree add "$WORKTREE_DIR" -b "$BRANCH_NAME" "origin/${BASE_BRANCH}"; then
+  # Clean up partially created directory on failure
+  if [[ -d "$WORKTREE_DIR" ]]; then
+    rm -rf "$WORKTREE_DIR"
+  fi
+  echo "ERROR: Failed to create worktree. Check if branch '${BRANCH_NAME}' already exists." >&2
+  exit 1
+fi
 
 echo "Worktree created successfully."
 echo "  Path:   $(cd "$WORKTREE_DIR" && pwd)"

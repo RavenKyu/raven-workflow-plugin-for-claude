@@ -20,6 +20,13 @@ if echo "$COMMAND" | grep -qE 'git\s+checkout\s+-b|git\s+switch\s+-c'; then
   exit 2
 fi
 
+# Detect branch copy/move commands (these also create new branch references)
+if echo "$COMMAND" | grep -qE 'git\s+branch\s+(-c|-C|-m|-M|--copy|--move)\b'; then
+  echo "BLOCKED: Direct branch creation is not allowed." >&2
+  echo "Use /workflow:worktree <issue-number> to create a worktree-based branch." >&2
+  exit 2
+fi
+
 # Detect git branch <new-name> (but allow flags like -d, -D, --list, -v, -a, -r, --show-current)
 if echo "$COMMAND" | grep -qE 'git\s+branch\s+[^-]'; then
   # Allow: git branch -d, git branch -D, git branch --delete, git branch --list, etc.
