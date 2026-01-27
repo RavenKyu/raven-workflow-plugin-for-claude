@@ -288,8 +288,8 @@ parent/
 | `/worktree remove <path>` | worktree 삭제 (머지 여부 선택) |
 
 **규칙**:
-- 직접 브랜치 생성(`git checkout -b`, `git switch -c`)은 Hook에 의해 **차단**됨
-- 반드시 GitHub 이슈가 먼저 존재해야 함
+- 직접 브랜치 생성(`git checkout -b`, `git switch -c`, `git branch -c/-m`)은 Hook에 의해 **차단**됨
+- GitHub repo가 있으면 이슈가 먼저 존재해야 함. 없으면 description 필수
 - description을 직접 지정할 수도 있음: `/worktree 42 user-auth`
 
 ---
@@ -371,6 +371,9 @@ PR이 승인/머지된 후 워크트리를 정리합니다.
 머지 없이 삭제하려면:
 ```bash
 .claude/scripts/delete-worktree.sh ../worktrees/42-user-authentication
+
+# 확인 프롬프트 없이 삭제 (자동화 환경)
+.claude/scripts/delete-worktree.sh --yes ../worktrees/42-user-authentication
 ```
 
 ---
@@ -397,11 +400,18 @@ PR이 승인/머지된 후 워크트리를 정리합니다.
 .claude/scripts/create-worktree.sh <issue-number> [description]
 ```
 
-- GitHub 이슈 존재 여부를 확인합니다.
+- 이슈 번호가 양의 정수인지 검증합니다.
+- GitHub repo가 있으면 이슈 존재 여부를 확인하고, 없으면 건너뜁니다 (description 필수).
 - `../worktrees/<number>-<description>/` 경로에 워크트리를 생성합니다.
-- `feat/<number>-<description>` 브랜치를 `origin/main` 기준으로 생성합니다.
-- Beads가 설치되어 있으면 `bd init`을 자동 실행합니다.
-- description을 생략하면 이슈 제목에서 자동 추출합니다.
+- 브랜치 시작점: `origin/main` → `origin/master` → 로컬 `main` → `master` → `HEAD` 순서로 fallback합니다.
+- description을 생략하면 이슈 제목에서 자동 추출합니다 (CJK 제목은 `task`로 fallback).
+- 워크트리 생성 실패 시 잔여 디렉토리를 자동 정리합니다.
+- Beads가 설치되어 있으면 서브셸에서 `bd init`을 실행합니다.
+
+> **GitHub 없는 신규 프로젝트**: description을 직접 지정하면 GitHub/remote 없이도 사용 가능합니다.
+> ```bash
+> .claude/scripts/create-worktree.sh 1 my-feature
+> ```
 
 ### `merge-worktree.sh`
 
@@ -409,18 +419,23 @@ PR이 승인/머지된 후 워크트리를 정리합니다.
 .claude/scripts/merge-worktree.sh [worktree-path]
 ```
 
+- 경로가 `worktrees/` 디렉토리 내에 있는지 검증합니다.
+- main repo에 커밋되지 않은 변경사항이 있으면 중단합니다.
 - 워크트리 브랜치를 main에 머지합니다.
-- 워크트리와 브랜치를 삭제합니다.
+- **머지 충돌 발생 시** 워크트리/브랜치 정리를 건너뛰고 복구 안내를 표시합니다.
+- 머지 성공 시 워크트리와 브랜치를 삭제합니다.
 - 인자를 생략하면 현재 디렉토리를 워크트리로 간주합니다.
 
 ### `delete-worktree.sh`
 
 ```bash
-.claude/scripts/delete-worktree.sh <worktree-path>
+.claude/scripts/delete-worktree.sh [--yes] <worktree-path>
 ```
 
 - 머지 없이 워크트리와 브랜치를 강제 삭제합니다.
-- 삭제 전 확인 프롬프트를 표시합니다.
+- 경로가 `worktrees/` 디렉토리 내에 있는지 검증합니다.
+- `--yes` / `-y` 플래그로 확인 프롬프트를 건너뛸 수 있습니다 (자동화 환경용).
+- 사용자가 취소하면 non-zero exit code를 반환합니다.
 
 ### `setup-beads.sh`
 
@@ -451,9 +466,12 @@ Claude Code의 `PreToolUse` 이벤트에서 Bash 명령을 감시합니다.
 
 **차단되는 명령**:
 ```bash
-git checkout -b <branch>    # 차단
-git switch -c <branch>      # 차단
-git branch <new-name>       # 차단
+git checkout -b <branch>           # 차단
+git switch -c <branch>             # 차단
+git branch <new-name>              # 차단
+git branch -c/-C <old> <new>       # 차단 (복사)
+git branch -m/-M <old> <new>       # 차단 (이름 변경)
+git branch --copy/--move <old> <new>  # 차단
 ```
 
 **허용되는 명령**:
@@ -466,9 +484,13 @@ git branch -a                # 허용 (전체 목록)
 git branch --show-current    # 허용 (현재 브랜치)
 ```
 
+**False-positive 방지**: heredoc 본문과 따옴표 내용은 자동으로 제거된 후 패턴 매칭됩니다. 커밋 메시지에 `git branch` 텍스트가 포함되어도 차단되지 않습니다.
+
+**jq 의존성**: `jq`가 설치되어 있지 않으면 훅이 모든 명령을 차단하여 무단 우회를 방지합니다.
+
 차단 시 출력:
 ```
-BLOCKED: 직접 브랜치 생성이 차단되었습니다.
+BLOCKED: Direct branch creation is not allowed.
 Use /worktree <issue-number> to create a worktree-based branch.
 ```
 
