@@ -28,11 +28,6 @@ if ! gh repo view --json name > /dev/null 2>&1; then
   HAS_GITHUB=false
 fi
 
-HAS_REMOTE=true
-if ! git remote get-url origin > /dev/null 2>&1; then
-  HAS_REMOTE=false
-fi
-
 # Verify issue exists (skip if no GitHub repo)
 if [[ "$HAS_GITHUB" == true ]]; then
   if ! gh issue view "$ISSUE_NUMBER" --json title -q '.title' > /dev/null 2>&1; then
@@ -73,44 +68,9 @@ if git worktree list | grep -q "/${ISSUE_NUMBER}-${DESCRIPTION} "; then
   exit 0
 fi
 
-# Determine start point for new branch
-if [[ "$HAS_REMOTE" == true ]]; then
-  # Fetch latest from remote — fail explicitly if fetch fails
-  FETCH_SUCCESS=false
-  if git fetch origin main 2>&1; then
-    FETCH_SUCCESS=true
-  elif git fetch origin master 2>&1; then
-    FETCH_SUCCESS=true
-  fi
-
-  if [[ "$FETCH_SUCCESS" == false ]]; then
-    echo "ERROR: Failed to fetch from remote 'origin'." >&2
-    echo "" >&2
-    echo "Troubleshooting steps:" >&2
-    echo "  1. Check your network connection" >&2
-    echo "  2. Verify your authentication (SSH key or token)" >&2
-    echo "  3. Run 'git fetch origin' manually to see detailed errors" >&2
-    exit 1
-  fi
-
-  if git rev-parse --verify origin/main > /dev/null 2>&1; then
-    START_POINT="origin/main"
-  elif git rev-parse --verify origin/master > /dev/null 2>&1; then
-    START_POINT="origin/master"
-  else
-    echo "WARNING: Remote has no main/master branch. Using local HEAD." >&2
-    START_POINT="HEAD"
-  fi
-else
-  # No remote — use local main, master, or HEAD
-  if git rev-parse --verify main > /dev/null 2>&1; then
-    START_POINT="main"
-  elif git rev-parse --verify master > /dev/null 2>&1; then
-    START_POINT="master"
-  else
-    START_POINT="HEAD"
-  fi
-fi
+# Determine start point for new branch — use current branch
+CURRENT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "HEAD")
+START_POINT="HEAD"
 
 # Create worktree
 if ! git worktree add "$WORKTREE_DIR" -b "$BRANCH_NAME" "$START_POINT"; then
@@ -125,6 +85,7 @@ fi
 echo "Worktree created successfully."
 echo "  Path:   $(cd "$WORKTREE_DIR" && pwd)"
 echo "  Branch: ${BRANCH_NAME}"
+echo "  Base:   ${CURRENT_BRANCH}"
 echo "  Issue:  #${ISSUE_NUMBER}"
 
 # Initialize beads if available
