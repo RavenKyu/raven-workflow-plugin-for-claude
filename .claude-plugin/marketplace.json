@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Enforced Spec → GitHub Issue → Git Worktree → Beads workflow with Ralph loop and Serena MCP support",
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "plugins": [
     {
       "name": "workflow",
       "source": "./plugins/workflow",
       "description": "Enforced Spec → GitHub Issue → Git Worktree → Beads workflow with Ralph loop and Serena MCP",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "Raven",
         "email": "hong18s@gmail.com"
