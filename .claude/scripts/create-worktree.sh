@@ -75,8 +75,23 @@ fi
 
 # Determine start point for new branch
 if [[ "$HAS_REMOTE" == true ]]; then
-  # Fetch latest from remote
-  git fetch origin main 2>/dev/null || git fetch origin master 2>/dev/null || true
+  # Fetch latest from remote — fail explicitly if fetch fails
+  FETCH_SUCCESS=false
+  if git fetch origin main 2>&1; then
+    FETCH_SUCCESS=true
+  elif git fetch origin master 2>&1; then
+    FETCH_SUCCESS=true
+  fi
+
+  if [[ "$FETCH_SUCCESS" == false ]]; then
+    echo "ERROR: Failed to fetch from remote 'origin'." >&2
+    echo "" >&2
+    echo "Troubleshooting steps:" >&2
+    echo "  1. Check your network connection" >&2
+    echo "  2. Verify your authentication (SSH key or token)" >&2
+    echo "  3. Run 'git fetch origin' manually to see detailed errors" >&2
+    exit 1
+  fi
 
   if git rev-parse --verify origin/main > /dev/null 2>&1; then
     START_POINT="origin/main"
